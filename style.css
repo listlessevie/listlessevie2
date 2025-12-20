@@ -329,8 +329,9 @@ html, body {
 #player-bg-artwork,
 #player-bg-layer {
   display: none !important;
+}
 
-  /* === FLAT, AIRY SHADOW OVERRIDES === */
+/* === FLAT, AIRY SHADOW OVERRIDES === */
 
 /* Main card: soft, flat shadow */
 #player-content {
@@ -341,5 +342,4 @@ html, body {
 #album-art,
 #album-art.active {
   box-shadow: 0 0 0 6px #fff !important;
-}
 }
