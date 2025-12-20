@@ -329,4 +329,17 @@ html, body {
 #player-bg-artwork,
 #player-bg-layer {
   display: none !important;
+
+  /* === FLAT, AIRY SHADOW OVERRIDES === */
+
+/* Main card: soft, flat shadow */
+#player-content {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Album art: remove heavy floating shadow */
+#album-art,
+#album-art.active {
+  box-shadow: 0 0 0 6px #fff !important;
+}
 }
