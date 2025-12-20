@@ -1,6 +1,5 @@
 $(function () {
   const playerTrack = $("#player-track");
-  const bgArtwork = $("#player-bg-artwork");
   const albumName = $("#album-name");
   const trackName = $("#track-name");
   const albumArt = $("#album-art");
@@ -216,7 +215,6 @@ $(function () {
 
       bgArtworkUrl = $("#" + currArtwork).attr("src");
 
-      bgArtwork.css({ "background-image": "url(" + bgArtworkUrl + ")" });
     } else {
       if (flag == 0 || flag == 1) --currIndex;
       else ++currIndex;
