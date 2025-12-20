@@ -319,3 +319,14 @@ body {
 .button:hover i {
   color: #fff;
 }
+
+/* === FORCE FULL TRANSPARENT BACKGROUND === */
+
+html, body {
+  background: transparent !important;
+}
+
+#player-bg-artwork,
+#player-bg-layer {
+  display: none !important;
+}
