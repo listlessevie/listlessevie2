@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Notion Player Thing</title>
+    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.3.1/css/all.css'><link rel="stylesheet" href="./style.css">
+
+  </head>
+    
+  <body>
+  <div id="player-bg-artwork"></div>
+<div id="player-bg-layer"></div>
+<div id="player-container">
+  <div id="player">
+    <div id="player-track">
+      <div id="album-name"></div>
+      <div id="track-name"></div>
+      <div id="track-time">
+        <div id="current-time"></div>
+        <div id="track-length"></div>
+      </div>
+      <div id="seek-bar-container">
+        <div id="seek-time"></div>
+        <div id="s-hover"></div>
+        <div id="seek-bar"></div>
+      </div>
+    </div>
+    <div id="player-content">
+      <div id="album-art">
+        <img src="https://i1.sndcdn.com/artworks-Y56LF9hKWd6z-0-t500x500.jpg" class="active" id="_1" />
+        <img src="https://singhimalaya.github.io/Codepen/assets/img/album-arts/2.jpg" id="_2" />
+        <img src="https://singhimalaya.github.io/Codepen/assets/img/album-arts/3.jpg" id="_3" />
+        <img src="https://singhimalaya.github.io/Codepen/assets/img/album-arts/4.jpg" id="_4" />
+        <img src="https://singhimalaya.github.io/Codepen/assets/img/album-arts/5.jpg" id="_5" />
+        <div id="buffer-box">Buffering ...</div>
+      </div>
+      <div id="player-controls">
+        <div class="control">
+          <div class="button" id="play-previous">
+            <i class="fas fa-backward"></i>
+          </div>
+        </div>
+        <div class="control">
+          <div class="button" id="play-pause-button">
+            <i class="fas fa-play"></i>
+          </div>
+        </div>
+        <div class="control">
+          <div class="button" id="play-next">
+            <i class="fas fa-forward"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <script src='https://code.jquery.com/jquery-2.1.4.min.js'></script><script  src="./script.js"></script>
+
+  </body>
+  
+</html>
