@@ -14,14 +14,14 @@ $(function () {
   const playPreviousTrackButton = $("#play-previous");
   const playNextTrackButton = $("#play-next");
   const albums = [
-    "Blue Banisters",
+    "Demon Days",
     "Dawn",
     "Electro Boy",
     "Home",
     "Proxy (Original Mix)"
   ];
   const trackNames = [
-    "Lana Del Rey - Dealer",
+    "Gorillaz - Dirty Harry",
     "Skylike - Dawn",
     "Kaaze - Electro Boy",
     "Jordan Schor - Home",
@@ -29,7 +29,7 @@ $(function () {
   ];
   const albumArtworks = ["_1", "_2", "_3", "_4", "_5"];
   const trackUrl = [
-    "https://uc105807b1bf6c759d7a65c94040.dl.dropboxusercontent.com/cd/0/inline/C3X5BogOeLBhCeo9syAs0Vz-gIyzO1_SuJYYqGMzWDme2GlfbUfOQgNRAIRsuxq1imNcwjIKfRgiBOalNHWu-GfNDgGpk2Q1s3U13ls84g7U-yHUbISty48RKo_mFfOtJxVI7qNjevHNwxz1htpTBSex/file#",
+    "https://ucef648c91c7a3de60bc408fe88b.dl.dropboxusercontent.com/cd/0/inline/C3emegnUu-feiBwfsdfyGl5LsBcgi24GzBD5I1qbMs9VQ9qheuEol6Yf3XocWBHJGCqB6IRH2nYpfLqBfL1NuUoXZcjPjYvRF7BpaNH3rGxa8JGVOpdzzJYvhOQreBpjTivP7300VHcQzOpOMdAsw_vi/file#",
     "https://singhimalaya.github.io/Codepen/assets/music/2.mp3",
     "https://singhimalaya.github.io/Codepen/assets/music/3.mp3",
     "https://singhimalaya.github.io/Codepen/assets/music/4.mp3",
