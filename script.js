@@ -29,7 +29,7 @@ $(function () {
   ];
   const albumArtworks = ["_1", "_2", "_3", "_4", "_5"];
   const trackUrl = [
-    "assets/music/dirty-harry.mp3",
+    "assets/music/buglikeanangel.mp3",
     "https://singhimalaya.github.io/Codepen/assets/music/2.mp3",
     "https://singhimalaya.github.io/Codepen/assets/music/3.mp3",
     "https://singhimalaya.github.io/Codepen/assets/music/4.mp3",
