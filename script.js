@@ -14,14 +14,14 @@ $(function () {
   const playPreviousTrackButton = $("#play-previous");
   const playNextTrackButton = $("#play-next");
   const albums = [
-    "Gorillaz - Dirty Harry",
+    "NILFRUITS - Wozwald",
     "Dawn",
     "Electro Boy",
     "Home",
     "Proxy (Original Mix)"
   ];
   const trackNames = [
-    "Demon Days",
+    "NOMAN",
     "Skylike - Dawn",
     "Kaaze - Electro Boy",
     "Jordan Schor - Home",
