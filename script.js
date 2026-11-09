@@ -8,8 +8,56 @@ $(function () {
   const $progress = $('#seek-bar');
   const $hover = $('#s-hover');
   const $tooltip = $('#seek-time');
-  const audio = new Audio();
+  // A video media element can play the same MP3s and supports muted autoplay
+  // in browsers that require a click even for a muted Audio element.
+  // It is never added to the page, so the player layout stays exactly the same.
+  const audio = document.createElement('video');
+  audio.playsInline = true;
   audio.preload = 'metadata';
+  // Always start silently, before assigning a source or attempting autoplay.
+  audio.defaultMuted = true;
+  audio.muted = true;
+
+  const $muteButton = $(
+    '<button type="button" id="mute-button" aria-label="Unmute" title="Unmute">' +
+      '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M3 9h4l5-4v14l-5-4H3z"/>' +
+        '<g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">' +
+          '<path class="sound-off" d="m16 9 6 6m0-6-6 6"/>' +
+          '<path class="sound-on" style="display:none" d="M16 8a6 6 0 0 1 0 8M19 5a10 10 0 0 1 0 14"/>' +
+        '</g>' +
+      '</svg>' +
+    '</button>'
+  ).appendTo('#player-content');
+
+  // Only style the new control; leave the existing player design untouched.
+  $('<style>').text(
+    '#mute-button {position:absolute;right:6px;bottom:4px;z-index:3;' +
+      'display:flex;align-items:center;justify-content:center;' +
+      'width:24px;height:24px;padding:0;border:0;border-radius:4px;' +
+      'background:transparent;color:#d6dee7;cursor:pointer;' +
+      'transition:0.2s ease background-color,0.2s ease color;}' +
+    '#mute-button svg {display:block;}' +
+    '#mute-button:hover {background-color:#d6d6de;color:#fff;}' +
+    '#mute-button:focus-visible {outline:2px solid #d6dee7;outline-offset:2px;}'
+  ).appendTo('head');
+
+  function updateMuteButton() {
+    const label = audio.muted ? 'Unmute' : 'Mute';
+    $muteButton.attr({ 'aria-label': label, title: label });
+    $muteButton.find('.sound-off').toggle(audio.muted);
+    $muteButton.find('.sound-on').toggle(!audio.muted);
+  }
+
+  $muteButton.on('click', function () {
+    audio.muted = !audio.muted;
+    updateMuteButton();
+    // A direct click can start playback if the initial autoplay was blocked.
+    if (!audio.muted && audio.paused) play();
+  });
+
+  $(audio).on('volumechange', updateMuteButton);
+  updateMuteButton();
 
   let index = 0;
   let playRequest = 0;
@@ -156,5 +204,5 @@ $(function () {
       console.warn('Check the audio file path:', tracks[index][2]);
     });
 
-  selectTrack(0, false);
+  selectTrack(0, true);
 });
