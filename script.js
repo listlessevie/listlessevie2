@@ -1,252 +1,160 @@
+// Notion music player. Audio paths are relative to the page, not the script.
 $(function () {
-  const playerTrack = $("#player-track");
-  const albumName = $("#album-name");
-  const trackName = $("#track-name");
-  const albumArt = $("#album-art");
-  const sArea = $("#seek-bar-container");
-  const seekBar = $("#seek-bar");
-  const trackTime = $("#track-time");
-  const seekTime = $("#seek-time");
-  const sHover = $("#s-hover");
-  const playPauseButton = $("#play-pause-button");
-  const tProgress = $("#current-time");
-  const tTime = $("#track-length");
-  const playPreviousTrackButton = $("#play-previous");
-  const playNextTrackButton = $("#play-next");
-  const albums = [
-    "NILFRUITS - Wozwald",
-    "Dawn",
-    "Electro Boy",
-    "Home",
-    "Proxy (Original Mix)"
-  ];
-  const trackNames = [
-    "NOMAN",
-    "Skylike - Dawn",
-    "Kaaze - Electro Boy",
-    "Jordan Schor - Home",
-    "Martin Garrix - Proxy"
-  ];
-  const albumArtworks = ["_1", "_2", "_3", "_4", "_5"];
-  const trackUrl = [
-    "assets/music/wozwald.mp3",
-    "https://singhimalaya.github.io/Codepen/assets/music/2.mp3",
-    "https://singhimalaya.github.io/Codepen/assets/music/3.mp3",
-    "https://singhimalaya.github.io/Codepen/assets/music/4.mp3",
-    "https://singhimalaya.github.io/Codepen/assets/music/5.mp3"
+  const $panel = $('#player-track');
+  const $disc = $('#album-art');
+  const $button = $('#play-pause-button');
+  const $icon = $button.find('i');
+  const $timeline = $('#seek-bar-container');
+  const $progress = $('#seek-bar');
+  const $hover = $('#s-hover');
+  const $tooltip = $('#seek-time');
+  const audio = new Audio();
+  audio.preload = 'metadata';
+
+  let index = 0;
+  let playRequest = 0;
+
+  // Reuse Proxy's artwork slot for Puppy Princess.
+  // The other four songs keep their original artwork.
+  const record = 'https://merch.ambientinks.com/cdn/shop/files/HF-LP-RedBeerVariant-SideA.png?v=1752258366';
+  $disc.find('#_5').attr({ src: record, alt: 'Hot Freaks vinyl record' });
+
+  // Fill the existing circle and show the vinyl's own center hole.
+  $('<style>').text(
+    '#album-art #_5 {width:138%;height:138%;left:-19%;top:-19%;}' +
+    '#album-art.puppy-record::before {display:none;}'
+  ).appendTo('head');
+
+  const demo = 'https://singhimalaya.github.io/Codepen/assets/music/';
+
+  // Each row is [bold title, subtitle, audio file, artwork ID].
+  const tracks = [
+    ['Puppy Princess', 'Hot Freaks', 'assets/music/puppy%20princess.mp3', '_5'],
+    ['NILFRUITS - Wozwald', 'NOMAN', 'assets/music/wozwald.mp3', '_1'],
+    ['Dawn', 'Skylike - Dawn', demo + '2.mp3', '_2'],
+    ['Electro Boy', 'Kaaze - Electro Boy', demo + '3.mp3', '_3'],
+    ['Home', 'Jordan Schor - Home', demo + '4.mp3', '_4']
   ];
 
-  let bgArtworkUrl,
-    i = playPauseButton.find("i"),
-    seekT,
-    seekLoc,
-    seekBarPos,
-    cM,
-    ctMinutes,
-    ctSeconds,
-    curMinutes,
-    curSeconds,
-    durMinutes,
-    durSeconds,
-    playProgress,
-    bTime,
-    nTime = 0,
-    buffInterval = null,
-    tFlag = false,
-    currIndex = -1;
-
-  function playPause() {
-    setTimeout(function () {
-      if (audio.paused) {
-        playerTrack.addClass("active");
-        albumArt.addClass("active");
-        checkBuffering();
-        i.attr("class", "fas fa-pause");
-        audio.play();
-      } else {
-        playerTrack.removeClass("active");
-        albumArt.removeClass("active");
-        clearInterval(buffInterval);
-        albumArt.removeClass("buffering");
-        i.attr("class", "fas fa-play");
-        audio.pause();
-      }
-    }, 300);
+  function timeLabel(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+    const n = Math.floor(seconds);
+    return String(Math.floor(n / 60)).padStart(2, '0') + ':' +
+      String(n % 60).padStart(2, '0');
   }
 
-  function showHover(event) {
-    seekBarPos = sArea.offset();
-    seekT = event.clientX - seekBarPos.left;
-    seekLoc = audio.duration * (seekT / sArea.outerWidth());
+  function showPlaying(playing) {
+    $panel.toggleClass('active', playing);
+    $disc.toggleClass('active', playing);
+    $icon.attr('class', playing ? 'fas fa-pause' : 'fas fa-play');
+    if (!playing) $disc.removeClass('buffering');
+  }
 
-    sHover.width(seekT);
+  function updateTime() {
+    const duration = audio.duration;
+    const known = Number.isFinite(duration) && duration > 0;
+    $('#current-time').text(timeLabel(audio.currentTime));
+    $('#track-length').text(timeLabel(duration));
+    $('#track-time').toggleClass('active', known);
+    $progress.width((known ? 100 * audio.currentTime / duration : 0) + '%');
+  }
 
-    cM = seekLoc / 60;
+  function play() {
+    const request = ++playRequest;
+    const pending = audio.play();
+    if (pending && pending.catch) {
+      pending.catch(function (error) {
+        if (request !== playRequest || error.name === 'AbortError') return;
+        showPlaying(false);
+        console.warn('Could not play ' + tracks[index][2], error);
+      });
+    }
+  }
 
-    ctMinutes = Math.floor(cM);
-    ctSeconds = Math.floor(seekLoc - ctMinutes * 60);
+  function selectTrack(next, startPlaying) {
+    if (next < 0 || next >= tracks.length) return;
+    ++playRequest;
+    index = next;
+    audio.pause();
 
-    if (ctMinutes < 0 || ctSeconds < 0) return;
+    const [title, subtitle, src, artId] = tracks[index];
+    $('#album-name').text(title);
+    $('#track-name').text(subtitle);
+    $disc.find('img.active').removeClass('active');
+    $disc.find('#' + artId).addClass('active');
+    $disc.toggleClass('puppy-record', index === 0);
 
-    if (ctMinutes < 0 || ctSeconds < 0) return;
+    showPlaying(false);
+    audio.src = src;
+    $('#current-time, #track-length').text('00:00');
+    $('#track-time').removeClass('active');
+    $progress.width(0);
 
-    if (ctMinutes < 10) ctMinutes = "0" + ctMinutes;
-    if (ctSeconds < 10) ctSeconds = "0" + ctSeconds;
+    if (startPlaying) play();
+  }
 
-    if (isNaN(ctMinutes) || isNaN(ctSeconds)) seekTime.text("--:--");
-    else seekTime.text(ctMinutes + ":" + ctSeconds);
-
-    seekTime.css({ left: seekT, "margin-left": "-21px" }).fadeIn(0);
+  function fraction(event) {
+    const rect = $timeline[0].getBoundingClientRect();
+    return Math.max(0, Math.min(1, (event.clientX - rect.left) / (rect.width || 1)));
   }
 
   function hideHover() {
-    sHover.width(0);
-    seekTime
-      .text("00:00")
-      .css({ left: "0px", "margin-left": "0px" })
-      .fadeOut(0);
+    $hover.width(0);
+    $tooltip.hide();
   }
 
-  function playFromClickedPos() {
-    audio.currentTime = seekLoc;
-    seekBar.width(seekT);
-    hideHover();
-  }
-
-  function updateCurrTime() {
-    nTime = new Date();
-    nTime = nTime.getTime();
-
-    if (!tFlag) {
-      tFlag = true;
-      trackTime.addClass("active");
-    }
-
-    curMinutes = Math.floor(audio.currentTime / 60);
-    curSeconds = Math.floor(audio.currentTime - curMinutes * 60);
-
-    durMinutes = Math.floor(audio.duration / 60);
-    durSeconds = Math.floor(audio.duration - durMinutes * 60);
-
-    playProgress = (audio.currentTime / audio.duration) * 100;
-
-    if (curMinutes < 10) curMinutes = "0" + curMinutes;
-    if (curSeconds < 10) curSeconds = "0" + curSeconds;
-
-    if (durMinutes < 10) durMinutes = "0" + durMinutes;
-    if (durSeconds < 10) durSeconds = "0" + durSeconds;
-
-    if (isNaN(curMinutes) || isNaN(curSeconds)) tProgress.text("00:00");
-    else tProgress.text(curMinutes + ":" + curSeconds);
-
-    if (isNaN(durMinutes) || isNaN(durSeconds)) tTime.text("00:00");
-    else tTime.text(durMinutes + ":" + durSeconds);
-
-    if (
-      isNaN(curMinutes) ||
-      isNaN(curSeconds) ||
-      isNaN(durMinutes) ||
-      isNaN(durSeconds)
-    )
-      trackTime.removeClass("active");
-    else trackTime.addClass("active");
-
-    seekBar.width(playProgress + "%");
-
-    if (playProgress == 100) {
-      i.attr("class", "fa fa-play");
-      seekBar.width(0);
-      tProgress.text("00:00");
-      albumArt.removeClass("buffering").removeClass("active");
-      clearInterval(buffInterval);
-    }
-  }
-
-  function checkBuffering() {
-    clearInterval(buffInterval);
-    buffInterval = setInterval(function () {
-      if (nTime == 0 || bTime - nTime > 1000) albumArt.addClass("buffering");
-      else albumArt.removeClass("buffering");
-
-      bTime = new Date();
-      bTime = bTime.getTime();
-    }, 100);
-  }
-
-  function selectTrack(flag) {
-    if (flag == 0 || flag == 1) ++currIndex;
-    else --currIndex;
-
-    if (currIndex > -1 && currIndex < albumArtworks.length) {
-      if (flag == 0) i.attr("class", "fa fa-play");
-      else {
-        albumArt.removeClass("buffering");
-        i.attr("class", "fa fa-pause");
-      }
-
-      seekBar.width(0);
-      trackTime.removeClass("active");
-      tProgress.text("00:00");
-      tTime.text("00:00");
-
-      currAlbum = albums[currIndex];
-      currTrackName = trackNames[currIndex];
-      currArtwork = albumArtworks[currIndex];
-
-      audio.src = trackUrl[currIndex];
-
-      nTime = 0;
-      bTime = new Date();
-      bTime = bTime.getTime();
-
-      if (flag != 0) {
-        audio.play();
-        playerTrack.addClass("active");
-        albumArt.addClass("active");
-
-        clearInterval(buffInterval);
-        checkBuffering();
-      }
-
-      albumName.text(currAlbum);
-      trackName.text(currTrackName);
-      albumArt.find("img.active").removeClass("active");
-      $("#" + currArtwork).addClass("active");
-
-      bgArtworkUrl = $("#" + currArtwork).attr("src");
-
+  $button.on('click', function () {
+    if (audio.paused || audio.ended) {
+      play();
     } else {
-      if (flag == 0 || flag == 1) --currIndex;
-      else ++currIndex;
+      ++playRequest;
+      audio.pause();
     }
-  }
+  });
 
-  function initPlayer() {
-    audio = new Audio();
+  $('#play-previous').on('click', function () {
+    selectTrack(index - 1, true);
+  });
 
-    selectTrack(0);
+  $('#play-next').on('click', function () {
+    selectTrack(index + 1, true);
+  });
 
-    audio.loop = false;
+  $timeline.on('mousemove', function (event) {
+    const f = fraction(event);
+    $hover.width((100 * f) + '%');
+    $tooltip.text(Number.isFinite(audio.duration) ? timeLabel(f * audio.duration) : '--:--')
+      .css({ left: (100 * f) + '%', 'margin-left': '-21px' }).show();
+  }).on('mouseout', hideHover).on('click', function (event) {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      audio.currentTime = fraction(event) * audio.duration;
+    }
+    hideHover();
+  });
 
-    playPauseButton.on("click", playPause);
-
-    sArea.mousemove(function (event) {
-      showHover(event);
+  $(audio)
+    .on('play', function () {
+      showPlaying(!audio.paused);
+    })
+    .on('playing canplay', function () {
+      $disc.removeClass('buffering');
+    })
+    .on('waiting', function () {
+      if (!audio.paused) $disc.addClass('buffering');
+    })
+    .on('pause', function () {
+      if (audio.paused) showPlaying(false);
+    })
+    .on('timeupdate loadedmetadata durationchange', updateTime)
+    .on('ended', function () {
+      showPlaying(false);
+      $progress.width(0);
+      $('#current-time').text('00:00');
+    })
+    .on('error', function () {
+      showPlaying(false);
+      console.warn('Check the audio file path:', tracks[index][2]);
     });
 
-    sArea.mouseout(hideHover);
-
-    sArea.on("click", playFromClickedPos);
-
-    $(audio).on("timeupdate", updateCurrTime);
-
-    playPreviousTrackButton.on("click", function () {
-      selectTrack(-1);
-    });
-    playNextTrackButton.on("click", function () {
-      selectTrack(1);
-    });
-  }
-
-  initPlayer();
+  selectTrack(0, false);
 });
