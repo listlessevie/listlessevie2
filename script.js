@@ -32,7 +32,7 @@ $(function () {
 
   // Only style the new control; leave the existing player design untouched.
   $('<style>').text(
-    '#mute-button {position:absolute;left:85.5px;bottom:4px;z-index:3;' +
+'#mute-button {position:absolute;left:6px;bottom:4px;z-index:3;' +
       'display:flex;align-items:center;justify-content:center;' +
       'width:24px;height:24px;padding:0;border:0;border-radius:4px;' +
       'background:transparent;color:#d6dee7;cursor:pointer;' +
